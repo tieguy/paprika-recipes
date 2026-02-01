@@ -1,6 +1,13 @@
 CHANGES
 =======
 
+* Update fork for Python 3.11+ and current Paprika API
+
+2.4.1
+-----
+
+* Adding missing 'typing\_extensions' requirement
+
 2.4.0
 -----
 

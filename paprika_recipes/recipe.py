@@ -26,16 +26,22 @@ class BaseRecipe:
             str(uuid.uuid4()).encode("utf-8")
         ).hexdigest()
     )
-    image_url: str = ""
+    image_url: UNKNOWN = None
+    in_trash: bool = False
     ingredients: str = ""
+    is_pinned: bool = False
     name: str = ""
     notes: str = ""
     nutritional_info: str = ""
-    photo: str = ""
-    photo_hash: str = ""
+    on_favorites: bool = False
+    on_grocery_list: bool = False
+    photo: UNKNOWN = None
+    photo_hash: UNKNOWN = None
     photo_large: UNKNOWN = None
+    photo_url: UNKNOWN = None
     prep_time: str = ""
     rating: int = 0
+    scale: UNKNOWN = None
     servings: str = ""
     source: str = ""
     source_url: str = ""
