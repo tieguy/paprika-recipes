@@ -4,10 +4,9 @@ import argparse
 import logging
 from abc import ABCMeta, abstractmethod
 from enum import Enum
+from importlib.metadata import entry_points
 from pathlib import Path
 from typing import Dict, Optional, Type
-
-import pkg_resources
 
 from .cache import Cache, DirectoryCache, NullCache, WriteOnlyDirectoryCache
 from .exceptions import PaprikaProgrammingError
@@ -20,11 +19,9 @@ logger = logging.getLogger(__name__)
 
 def get_installed_commands() -> Dict[str, Type[BaseCommand]]:
     possible_commands: Dict[str, Type[BaseCommand]] = {}
-    for entry_point in pkg_resources.iter_entry_points(
-        group="paprika_recipes.commands"
-    ):
+    for entry_point in entry_points(group="paprika_recipes.commands"):
         try:
-            loaded_class = entry_point.load(require=False)
+            loaded_class = entry_point.load()
         except ImportError:
             logger.warning(
                 "Attempted to load entrypoint %s, but " "an ImportError occurred.",

@@ -5,7 +5,7 @@ from rich.progress import track
 
 from ..command import RemoteCommand
 from ..types import ConfigDict
-from ..utils import dump_recipe_yaml
+from ..utils import dump_recipe_yaml, sanitize_filename
 
 
 class Command(RemoteCommand):
@@ -25,8 +25,9 @@ class Command(RemoteCommand):
         for recipe in track(
             remote, total=remote.count(), description="Downloading Recipes"
         ):
+            safe_name = sanitize_filename(recipe.name)
             with open(
-                self.options.export_path / Path(f"{recipe.name}.paprikarecipe.yaml"),
+                self.options.export_path / Path(f"{safe_name}.paprikarecipe.yaml"),
                 "w",
             ) as outf:
                 dump_recipe_yaml(recipe, outf)

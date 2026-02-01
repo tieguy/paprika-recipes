@@ -4,7 +4,7 @@ from pathlib import Path
 from ..archive import Archive
 from ..command import BaseCommand
 from ..types import ConfigDict
-from ..utils import dump_recipe_yaml
+from ..utils import dump_recipe_yaml, sanitize_filename
 
 
 class Command(BaseCommand):
@@ -24,9 +24,10 @@ class Command(BaseCommand):
             self.options.export_path.mkdir(parents=True, exist_ok=True)
 
             for recipe in archive:
+                safe_name = sanitize_filename(recipe.name)
                 with open(
                     self.options.export_path
-                    / Path(f"{recipe.name}.paprikarecipe.yaml"),
+                    / Path(f"{safe_name}.paprikarecipe.yaml"),
                     "w",
                 ) as outf:
                     dump_recipe_yaml(recipe, outf)

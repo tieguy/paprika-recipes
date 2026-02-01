@@ -1,4 +1,5 @@
 import os
+import re
 import subprocess
 import tempfile
 from collections import OrderedDict
@@ -13,6 +14,17 @@ from appdirs import user_config_dir
 from .constants import APP_NAME
 from .exceptions import AuthenticationError, PaprikaUserError
 from .types import ConfigDict
+
+
+def sanitize_filename(name: str) -> str:
+    """Sanitize a string to be safe for use as a filename."""
+    # Replace forward/back slashes with dashes
+    name = re.sub(r'[/\\]', '-', name)
+    # Replace other problematic characters
+    name = re.sub(r'[<>:"|?*]', '_', name)
+    # Remove leading/trailing whitespace and dots
+    name = name.strip(' .')
+    return name
 
 if TYPE_CHECKING:
     from .recipe import BaseRecipe  # noqa

@@ -1,3 +1,4 @@
+import time
 from dataclasses import dataclass
 from typing import Dict, Iterable, Iterator, List, Optional
 
@@ -7,6 +8,10 @@ from .cache import Cache, NullCache
 from .exceptions import PaprikaError, RequestError
 from .recipe import BaseRecipe
 from .types import RecipeManager, RemoteRecipeIdentifier
+
+# Rate limiting: ~40 calls/hour triggers IP blocks
+# Default to 2 seconds between requests (1800 calls/hour max, well under limit)
+DEFAULT_MIN_REQUEST_INTERVAL = 2.0
 
 
 @dataclass
@@ -21,10 +26,12 @@ class RemoteRecipe(BaseRecipe):
 
 class Remote(RecipeManager):
     _bearer_token: Optional[str] = None
+    _last_request_time: float = 0.0
 
     _domain: str
     _email: str
     _password: str
+    _min_request_interval: float
 
     def __init__(
         self,
@@ -32,12 +39,14 @@ class Remote(RecipeManager):
         password: str,
         domain: str = "www.paprikaapp.com",
         cache: Optional[Cache] = None,
+        min_request_interval: float = DEFAULT_MIN_REQUEST_INTERVAL,
     ):
         super().__init__()
         self._email = email
         self._password = password
         self._domain = domain
         self._cache = cache if cache else NullCache()
+        self._min_request_interval = min_request_interval
 
     def __iter__(self) -> Iterator[RemoteRecipe]:
         yield from self.recipes
@@ -97,11 +106,18 @@ class Remote(RecipeManager):
         ]
 
     def _request(self, method, path, authenticated=True, **kwargs):
+        # Rate limiting: ensure minimum interval between requests
+        if self._min_request_interval > 0:
+            elapsed = time.time() - self._last_request_time
+            if elapsed < self._min_request_interval:
+                time.sleep(self._min_request_interval - elapsed)
+
         if authenticated:
             kwargs.setdefault("headers", {})[
                 "Authorization"
             ] = f"Bearer {self.bearer_token}"
         result = requests.request(method, f"https://{self._domain}{path}", **kwargs)
+        self._last_request_time = time.time()
         result.raise_for_status()
 
         if "error" in result.json():

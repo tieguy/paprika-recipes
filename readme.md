@@ -10,6 +10,8 @@
 - **Rate limits**: Making ~40+ API calls/hour may trigger temporary IP blocks
 - **Be respectful**: Cache locally, sync minimally
 
+This fork includes built-in rate limiting (2-second delay between requests) to help avoid triggering blocks.
+
 ## Installation
 
 Install from this repository (recommended with [uv](https://github.com/astral-sh/uv)):
