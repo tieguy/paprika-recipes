@@ -123,3 +123,39 @@ paprika-recipes extract-archive /path/to/your/export.paprikarecipes /path/to/ext
 ```
 paprika-recipes create-archive /path/you/earlier/extracted/recipes/to/ /path/to/a/new/export.paprikarecipes
 ```
+
+### Moving Recipes to Trash
+
+There is no delete command, but you can move recipes to trash:
+
+1. Download the recipe (or find it in your downloaded recipes)
+2. Edit the YAML file and set `in_trash: true`
+3. Upload the modified recipe
+
+```bash
+# Example: trash a recipe
+sed -i 's/^in_trash: false$/in_trash: true/' "recipe.paprikarecipe.yaml"
+paprika-recipes upload-recipes ./directory-with-recipe/
+```
+
+The recipe will move to Paprika's trash (reversible in the app).
+
+## Known Limitations
+
+- **No delete command**: Use `in_trash: true` workaround above
+- **Categories are UUIDs**: Category names aren't human-readable in YAML files
+- **Rate limiting**: Downloads of large libraries take time (~2 seconds per recipe)
+- **Trashed recipes included**: `download-recipes` includes trashed recipes (check `in_trash` field)
+
+## Troubleshooting
+
+| Problem | Solution |
+|---------|----------|
+| "Unrecognized client" error | This fork fixes this - uses v1 API |
+| "Invalid uid" on upload | Use auto-generated UIDs or proper format (see CLAUDE.md) |
+| Upload shows 0% then exits | Check credentials: `~/.config/paprika-recipes/config.yaml` |
+| Recipe name with `/` causes error | This fork fixes this - sanitizes filenames |
+
+## Changes in This Fork
+
+See [CLAUDE.md](./CLAUDE.md) for detailed technical notes.

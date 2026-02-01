@@ -54,9 +54,76 @@ Before any release:
 1. Test `store-password` with real credentials
 2. Test `download-recipes` to verify API access works
 3. Test `upload-recipes` with a test recipe
+4. Test `trash` by setting `in_trash: true` and uploading
 
 ## Constraints
 
 - Keep changes minimal - this fork exists to fix compatibility, not add features
 - Maintain backwards compatibility with upstream where possible
 - Be respectful of Paprika's unofficial API (~40 calls/hour limit)
+
+---
+
+## Lessons Learned (January 2026)
+
+### UID Format Requirements
+
+Paprika rejects recipes with invalid UIDs. Valid format:
+```
+XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX-XXXXX-XXXXXXXXXXXXXXXX
+```
+Example: `4578C83D-3DFE-48D6-9C4A-628C4E62DA92-63733-0000147775974853`
+
+The `BaseRecipe` class auto-generates valid UIDs for new recipes, but manually created YAML files must use this format.
+
+### Recipe Deletion
+
+There is no delete API. To "delete" a recipe:
+1. Set `in_trash: true` in the recipe YAML
+2. Upload the modified recipe
+3. Recipe moves to Paprika's trash (reversible)
+
+### Download Validation
+
+Downloaded recipes should be validated:
+- All files should be valid YAML
+- Required fields: `name`, `uid`
+- `in_trash: true` recipes appear in download but not in app's main list
+- Recipe count from API may differ from app display (trashed recipes)
+
+### Upload Behavior
+
+- Upload overwrites existing recipes (matched by UID)
+- Upload writes server response back to local file (updates hash, etc.)
+- `notify()` is called after upload to trigger sync on devices
+- Empty `hash` field is OK - will be calculated before upload
+
+### Common Issues
+
+| Issue | Cause | Solution |
+|-------|-------|----------|
+| "Invalid uid" on upload | UID not in Paprika format | Use auto-generated UID or proper format |
+| Silent upload failure at 0% | Missing `--account` or bad credentials | Check `~/.config/paprika-recipes/config.yaml` |
+| FileNotFoundError on download | Recipe name contains `/` | Fixed in this fork with filename sanitization |
+| "Unrecognized client" on login | Using v2 API | Fixed in this fork - uses v1 API |
+
+### Recipe Field Notes
+
+- `categories`: List of UUID strings (not human-readable names)
+- `rating`: Integer 0-5
+- `created`: String format `YYYY-MM-DD HH:MM:SS`
+- `photo`: Base64 encoded image data (can be large)
+- `in_trash`: Boolean, controls visibility in app
+- `hash`: SHA256 of recipe content, auto-calculated on upload
+
+### Testing Without Destruction
+
+To test upload safely:
+1. Create a new test recipe (auto-generates new UID)
+2. Upload it
+3. Verify in app
+4. Set `in_trash: true` and upload again to remove
+
+To test with existing recipes:
+- Upload unchanged recipe (idempotent, same data)
+- Avoid modifying real recipes until confident
