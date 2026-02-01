@@ -115,7 +115,7 @@ class Remote(RecipeManager):
             try:
                 result = self._request(
                     "post",
-                    "/api/v2/account/login/",
+                    "/api/v1/account/login/",
                     data={"email": self._email, "password": self._password},
                     authenticated=False,
                 )

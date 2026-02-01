@@ -24,7 +24,7 @@ def get_installed_commands() -> Dict[str, Type[BaseCommand]]:
         group="paprika_recipes.commands"
     ):
         try:
-            loaded_class = entry_point.load()
+            loaded_class = entry_point.load(require=False)
         except ImportError:
             logger.warning(
                 "Attempted to load entrypoint %s, but " "an ImportError occurred.",
