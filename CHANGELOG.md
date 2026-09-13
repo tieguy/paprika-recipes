@@ -11,4 +11,5 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 
 ### Changed
+- Automate release testing (#1)
 - Add data integrity tests for recipe round-trip (#8)
